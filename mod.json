@@ -1,0 +1,53 @@
+{
+    "geode": "5.1.2",
+    "gd": { "android": "2.208" },
+    "id": "qais.build-helper-ai",
+    "name": "Build Helper AI",
+    "version": "1.0.0",
+    "developer": "Qais",
+    "description": "AI-powered GD level builder with Chat/Plan/Build modes, triggers, shaders, color channels, web search, and 3-design picker.",
+    "tags": ["editor", "ai", "utility"],
+    "settings": {
+        "ai-provider": {
+            "name": "AI Provider",
+            "type": "string",
+            "default": "openrouter",
+            "one-of": ["openrouter","gemini","claude","deepseek","ollama"]
+        },
+        "api-key": {
+            "name": "API Key",
+            "type": "string",
+            "default": "",
+            "is-secret": true
+        },
+        "tavily-key": {
+            "name": "Tavily API Key",
+            "description": "Free at tavily.com — enables web search",
+            "type": "string",
+            "default": "",
+            "is-secret": true
+        },
+        "openrouter-model": {
+            "name": "OpenRouter Model",
+            "type": "string",
+            "default": "openai/gpt-4o"
+        },
+        "ollama-url": {
+            "name": "Ollama URL",
+            "type": "string",
+            "default": "http://192.168.1.100:11434"
+        },
+        "ollama-model": {
+            "name": "Ollama Model",
+            "type": "string",
+            "default": "llama3"
+        },
+        "bpm": {
+            "name": "Song BPM",
+            "type": "int",
+            "default": 128,
+            "min": 60,
+            "max": 300
+        }
+    }
+}
