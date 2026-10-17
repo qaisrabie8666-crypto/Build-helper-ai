@@ -5,30 +5,20 @@ on:
   workflow_dispatch:
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup NDK
+      - name: Setup NDK r27
         uses: nttld/setup-ndk@v1
         id: ndk
         with:
-          ndk-version: r26d
-
-      - name: Install LLVM 19
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget gnupg
-          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-          echo "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main" | sudo tee /etc/apt/sources.list.d/llvm19.list
-          sudo apt-get update
-          sudo apt-get install -y clang-19 lld-19 libc++-19-dev libc++abi-19-dev
-          sudo ln -sf /usr/bin/clang-19 /usr/local/bin/clang
-          sudo ln -sf /usr/bin/clang++-19 /usr/local/bin/clang++
-          clang --version
+          ndk-version: r27c
 
       - name: Install dependencies
-        run: sudo apt-get install -y cmake ninja-build unzip curl git
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build unzip curl git
 
       - name: Install Geode CLI
         run: |
@@ -47,20 +37,20 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cpm
-          key: cpm-v2
+          key: cpm-v3
 
       - name: Configure
         run: |
+          NDK_PATH=${{ steps.ndk.outputs.ndk-path }}
+          CLANG_VER=$(ls $NDK_PATH/toolchains/llvm/prebuilt/linux-x86_64/bin/clang-* | grep -oP 'clang-\K[0-9]+' | sort -n | tail -1)
+          echo "NDK Clang version: $CLANG_VER"
           cmake -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DANDROID_ABI=arm64-v8a \
             -DANDROID_PLATFORM=android-23 \
-            -DCMAKE_TOOLCHAIN_FILE=${{ steps.ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake \
-            -DANDROID_STL=c++_shared \
+            -DCMAKE_TOOLCHAIN_FILE=$NDK_PATH/build/cmake/android.toolchain.cmake \
             -DGEODE_SDK=$HOME/geode-sdk \
-            -DCPM_SOURCE_CACHE=$HOME/.cpm \
-            -DCMAKE_C_COMPILER=/usr/bin/clang-19 \
-            -DCMAKE_CXX_COMPILER=/usr/bin/clang++-19
+            -DCPM_SOURCE_CACHE=$HOME/.cpm
 
       - name: Build
         run: cmake --build build --parallel 4
